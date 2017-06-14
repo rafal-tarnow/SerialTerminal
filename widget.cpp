@@ -28,7 +28,7 @@ Widget::Widget(QWidget *parent) :
     sendByTimer = new QTimer();
     connect(sendByTimer,SIGNAL(timeout()),this,SLOT(sendByTimerSlot()));
 
-    settingsDialog = new SettingsDialog("Reyfel", "Onion Terminal", "settingsDialog");
+    settingsDialog = new SettingsDialog("Reyfel", "SerialTerminal", "settingsDialog");
     newFrameDialog = new NewFrame();
     connect(newFrameDialog,SIGNAL(newFrameAdded(string,QString)),this,SLOT(newFrame(string,QString)));
 
@@ -106,7 +106,7 @@ void Widget::saveFrames(){
     map<string,QString >::iterator it;
 
 
-    QSettings settings("Reyfel", "Onion Terminal");
+    QSettings settings("Reyfel", "SerialTerminal");
 
     settings.beginWriteArray("ramki");
 
@@ -127,7 +127,7 @@ void Widget::saveFrames(){
 void Widget::readAndSetWindowDimmentions(){
     int windowHeight;
     int windowWidth;
-    QSettings settings("Reyfel", "Onion Terminal");
+    QSettings settings("Reyfel", "SerialTerminal");
     windowHeight = settings.value("windowHeight").toInt();
     windowWidth = settings.value("windowWidth").toInt();
 
@@ -147,19 +147,19 @@ void Widget::readAndSetWindowDimmentions(){
 }
 
 void Widget::saveWindowDimmentions(){
-    QSettings settings("Reyfel", "Onion Terminal");
+    QSettings settings("Reyfel", "SerialTerminal");
     settings.setValue("windowHeight",this->height());
     settings.setValue("windowWidth",this->width());
     settings.sync();
 }
 
 void Widget::readNewLineSign(){
-    QSettings settings("Reyfel", "Onion Terminal");
+    QSettings settings("Reyfel", "SerialTerminal");
     currentNewLineSign = (unsigned char)settings.value("currentNewLineSign").toInt();
 }
 
 void Widget::saveNewLineSign(){
-    QSettings settings("Reyfel", "Onion Terminal");
+    QSettings settings("Reyfel", "SerialTerminal");
     settings.setValue("currentNewLineSign",(unsigned char)currentNewLineSign);
     settings.sync();
 }
@@ -169,7 +169,7 @@ void Widget::readFrames(){
     map<string,QString >::iterator it;
 
 
-    QSettings settings("Reyfel", "Onion Terminal");
+    QSettings settings("Reyfel", "SerialTerminal");
     string frameName;
     QString frameData;
 
