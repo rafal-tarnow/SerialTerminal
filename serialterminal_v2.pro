@@ -8,9 +8,6 @@ QT       += core gui serialport network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-QMAKE_CC = gcc-4.9
-QMAKE_CXX = g++-4.9
-
 TARGET = serialterminal
 TEMPLATE = app
 

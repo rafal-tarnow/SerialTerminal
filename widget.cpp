@@ -38,11 +38,9 @@ Widget::Widget(QWidget *parent) :
     deleteFrameDialog = new DeleteFrameDialog();
     connect(deleteFrameDialog,SIGNAL(frameDeleted(string)),this,SLOT(onDialogFrameDeleted(string)));
 
-
     dataConnection = new Connection();
     connect(dataConnection,SIGNAL(onReceivedData(QByteArray)),this,SLOT(dataFromSerial(QByteArray)));
-
-
+    connect(dataConnection,SIGNAL(closeSocket()),this,SLOT(closeSocket()));
     readAndSetWindowDimmentions();
     readNewLineSign();
     readFrames();
@@ -56,8 +54,6 @@ Widget::~Widget()
 {
     dataConnection->closeConnection();
     saveWindowDimmentions();
-    this->width();
-    this->height();
     delete dataConnection;
     delete settingsDialog;
     delete newFrameDialog;
@@ -105,7 +101,6 @@ void Widget::updateComboBox(){
 void Widget::saveFrames(){
     map<string,QString >::iterator it;
 
-
     QSettings settings("Reyfel", "SerialTerminal");
 
     settings.beginWriteArray("ramki");
@@ -119,7 +114,6 @@ void Widget::saveFrames(){
 
         k++;
     }
-
     settings.endArray();
     settings.sync();
 }
@@ -164,15 +158,12 @@ void Widget::saveNewLineSign(){
     settings.sync();
 }
 
-
 void Widget::readFrames(){
     map<string,QString >::iterator it;
-
 
     QSettings settings("Reyfel", "SerialTerminal");
     string frameName;
     QString frameData;
-
 
     int size = settings.beginReadArray("ramki");
 
@@ -186,8 +177,6 @@ void Widget::readFrames(){
 
     settings.endArray();
 }
-
-
 
 void Widget::dataFromSerial(QByteArray data){
     //rawBuffer += data;
@@ -206,8 +195,6 @@ void Widget::openConnection(){
     } else {
         QMessageBox::critical(this, tr("Error"), dataConnection->errorString());
     }
-
-
 }
 
 void Widget::closeConnection(){
@@ -225,6 +212,14 @@ void Widget::on_pushButton_open_clicked()
         this->closeConnection();
     }else{
         this->openConnection();
+    }
+
+    if(dataConnection->isTCP())
+    {
+        if(dataConnection->isServer())
+            this->setWindowTitle("Server");
+        else
+            this->setWindowTitle("Client");
     }
 }
 
@@ -256,12 +251,10 @@ void Widget::on_pushButton_send_clicked()
             nonConstString.replace(nonConstString.indexOf(templ),templ.size(),replace);
             dataToSend.append(nonConstString.toInt(&ok,2));
         }
-
     }
 
-
     // ui->lineEdit->clear();
-
+    qDebug() << dataToSend;
     if(dataConnection->isOpen() ){
         dataConnection->sendData(dataToSend);
         linie.push_back(make_pair(TX_DATA,dataToSend));
@@ -273,6 +266,8 @@ void Widget::on_pushButton_send_clicked()
 void Widget::on_pushButton_clicked()
 {
     ui->textBrowser->clear();
+    ui->textBrowserHex->clear();
+    ui->textBrowserBin->clear();
 }
 
 void Widget::on_pushButton_addFrame_clicked()
@@ -296,10 +291,14 @@ void Widget::on_pushButton_delFrame_clicked()
 void Widget::timerEventDodajTekst(){
 
     QByteArray lineData;
-     QString tmp;
-     DataType dataType;
+    QString tmp;
+    QString tmpHex;
+    QString tmpDec;
+    QString tmpBin;
+    DataType dataType;
 
-    while(!linie.empty()){
+    while(!linie.empty())
+    {
 
         dataType = linie.front().first;
         lineData = linie.front().second;
@@ -307,37 +306,46 @@ void Widget::timerEventDodajTekst(){
 
         if(!lineData.isEmpty()){
 
-
-
-
             if(dataType == RX_DATA){
 
-                for(int i = 0; i < lineData.size(); i++){
-                    if(lineData[i] == (char)currentNewLineSign){
-                         tmp.append("<br>");
+                for(int i = 0; i < lineData.size(); i++)
+                {
+
+                    if(lineData[i] == (char)currentNewLineSign)
+                    {
+                        tmpDec.append("<br>");
+                        tmpHex.append("<br>");
+                        tmpBin.append("<br>");
                     }
-                    tmp.append(QString("%1 ").arg((unsigned char)lineData[i],2,16,QChar('0')));
+                    tmpDec.append(QString("%1 ").arg((unsigned char)lineData[i],2,10,QChar('0')));
+                    tmpHex.append(QString("0x%1 ").arg((unsigned char)lineData[i],0,16));
+                    tmpBin.append(QString("%1 ").arg((unsigned char)lineData[i],8,2,QChar('0')));
                 }
-                tmp = "<font color=#00AA00>"+tmp+"</font>";
+                tmpDec = "<font color=#00AA00><b>RX</b>: "+tmpDec+"</font>";
+                tmpHex = "<font color=#00AA00><b>RX</b>: "+tmpHex+"</font>";
+                tmpBin = "<font color=#00AA00><b>RX</b>: "+tmpBin+"</font>";
 
-            }else if(dataType == TX_DATA){
-
-                for(int i = 0; i < lineData.size(); i++){
-                    tmp.append(QString("%1 ").arg((unsigned char)lineData[i],2,16,QChar('0')));
+            }else if(dataType == TX_DATA)
+            {
+                for(int i = 0; i < lineData.size(); i++)
+                {
+                    tmpDec.append(QString("%1 ").arg((unsigned char)lineData[i],2,10,QChar('0')));
+                    tmpHex.append(QString("0x%1 ").arg((unsigned char)lineData[i],0,16));
+                    tmpBin.append(QString("%1 ").arg((unsigned char)lineData[i],8,2,QChar('0')));
                 }
-                tmp = "<font color=#0000AA><br>TX: "+tmp+"<br></font>";
-
-
+                tmpDec = "<font color=#0000AA><br><b>TX</b>: "+tmpDec+"<br></font>";
+                tmpHex = "<font color=#0000AA><br><b>TX</b>: "+tmpHex+"<br></font>";
+                tmpBin = "<font color=#0000AA><br><b>TX</b>: "+tmpBin+"<br></font>";
             }
-
-
-
         }
     }
 
-    ui->textBrowser->insertHtml(tmp);
+    ui->textBrowser->insertHtml(tmpDec);
+    ui->textBrowserHex->insertHtml(tmpHex);
+    ui->textBrowserBin->insertHtml(tmpBin);
     ui->textBrowser->moveCursor(QTextCursor::End);
-
+    ui->textBrowserHex->moveCursor(QTextCursor::End);
+    ui->textBrowserBin->moveCursor(QTextCursor::End);
 }
 
 void Widget::sendByTimerSlot(){
@@ -352,8 +360,14 @@ void Widget::on_pushButton_newLinePolicy_clicked()
 void Widget::on_checkBox_sendByTimer_clicked(bool checked)
 {
     if(checked == true){
-        sendByTimer->start(100);
+        sendByTimer->start(ui->spinBox->value());
     }else{
         sendByTimer->stop();
     }
+}
+
+void Widget::closeSocket()
+{
+    QMessageBox::information(this,tr("Disconnected"),tr("Disconnected from port"));
+    closeConnection();
 }

@@ -57,8 +57,9 @@ class SettingsDialog : public QDialog
 
 public:
     typedef enum{
-        EthernetConnection,
-        SerialPortConnection
+        UDP_Connection,
+        SerialPortConnection,
+        TCP_Connection
     } ConnectionType;
 
     struct Settings {
@@ -75,10 +76,15 @@ public:
         QString stringStopBits;
         QSerialPort::FlowControl flowControl;
         QString stringFlowControl;
-        /* Ethernet */
-        QHostAddress ip_adress;
-        quint16 send_port;
-        quint16 listen_port;
+        /* UDP */
+        QHostAddress ip_adress_UDP;
+        quint16 send_port_UDP;
+        quint16 listen_port_UDP;
+        /* TCP*/
+        QHostAddress ip_adress_TCP;
+        quint16 send_port_TCP;
+        quint16 listen_port_TCP;
+        bool serverApp;
     };
 
 
@@ -93,11 +99,12 @@ private slots:
     void checkCustomBaudRatePolicy(int idx);
     void checkCustomDevicePathPolicy(int idx);
 
-
     void on_selectBox_serial_port_clicked(bool checked);
-
     void on_groupBox_ethernet_clicked(bool checked);
+    void on_groupBox_TCP_clicked(bool checked);
 
+    void on_radioButtonClient_clicked();
+    void on_radioButtonServer_clicked();
 
 private:
     void saveDefaultSettings();

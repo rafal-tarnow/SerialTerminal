@@ -70,14 +70,19 @@ SettingsDialog::SettingsDialog(QString organizationName, QString appName,QString
     connect(ui->serialPortInfoListBox, SIGNAL(currentIndexChanged(int)),
             this, SLOT(checkCustomDevicePathPolicy(int)));
 
-
-
     ui->lineEdit_ip->setInputMask( "000.000.000.000" );
     ui->lineEdit_send_port->setInputMask("00000");
     ui->lineEdit_listen_port->setInputMask("00000");
     ui->lineEdit_ip->clear();
     ui->lineEdit_send_port->clear();
     ui->lineEdit_listen_port->clear();
+
+    ui->lineEdit_ip_TCP->setInputMask( "000.000.000.000" );
+    ui->lineEdit_send_port_TCP->setInputMask("0000");
+    ui->lineEdit_listen_port_TCP->setInputMask("0000");
+    ui->lineEdit_ip_TCP->clear();
+    ui->lineEdit_send_port_TCP->clear();
+    ui->lineEdit_listen_port_TCP->clear();
 
     fillPortsParameters();
     fillPortsInfo();
@@ -96,10 +101,10 @@ SettingsDialog::SettingsDialog(QString organizationName, QString appName,QString
         if(!list[nIter].isLoopback())
             if (list[nIter].protocol() == QAbstractSocket::IPv4Protocol )
                 ip_text += list[nIter].toString();
-
     }
 
     ui->groupBox_ethernet->setTitle("UDP Ethernet    (this machine IP: " + ip_text + ")");
+    ui->groupBox_TCP->setTitle("TCP Ethernet    (this machine IP: " + ip_text + ")");
 }
 
 void SettingsDialog::loadSavedSettings(){
@@ -111,16 +116,31 @@ void SettingsDialog::loadSavedSettings(){
     ui->stopBitsBox->setCurrentIndex(settings.value("stopBitsIndex").toInt());
     ui->flowControlBox->setCurrentIndex(settings.value("flowControlIndex").toInt());
 
-    ui->lineEdit_listen_port->setText(settings.value("listen_port").toString());
-    ui->lineEdit_send_port->setText(settings.value("send_port").toString());
-    ui->lineEdit_ip->setText(settings.value("ip_addres").toString());
+    ui->lineEdit_listen_port->setText(settings.value("listen_port_UDP").toString());
+    ui->lineEdit_send_port->setText(settings.value("send_port_UDP").toString());
+    ui->lineEdit_ip->setText(settings.value("ip_addres_UDP").toString());
 
-    if(settings.value("serialPortCheckBox").toBool()){
+    ui->lineEdit_listen_port_TCP->setText(settings.value("listen_port_TCP").toString());
+    ui->lineEdit_send_port_TCP->setText(settings.value("send_port_TCP").toString());
+    ui->lineEdit_ip_TCP->setText(settings.value("ip_addres_TCP").toString());
+
+    QString connType = settings.value("connType").toString();
+
+    if(connType == "RS232"){
         ui->selectBox_serial_port->setChecked(true);
         ui->groupBox_ethernet->setChecked(false);
-    }else{
+        ui->groupBox_TCP->setChecked(false);
+    }else if (connType == "UDP"){
         ui->selectBox_serial_port->setChecked(false);
         ui->groupBox_ethernet->setChecked(true);
+        ui->groupBox_TCP->setChecked(false);
+    }else if(connType == "TCP")
+    {
+        ui->selectBox_serial_port->setChecked(false);
+        ui->groupBox_ethernet->setChecked(false);
+        ui->groupBox_TCP->setChecked(true);
+        ui->radioButtonClient->setChecked(true);
+        currentSettings.serverApp = false;
     }
     settings.endGroup();
 }
@@ -138,10 +158,21 @@ void SettingsDialog::saveDefaultSettings(){
     settings.setValue("parityIndex", ui->parityBox->currentIndex());
     settings.setValue("stopBitsIndex", ui->stopBitsBox->currentIndex());
     settings.setValue("flowControlIndex", ui->flowControlBox->currentIndex());
-    settings.setValue("listen_port",ui->lineEdit_listen_port->text());
-    settings.setValue("send_port",ui->lineEdit_send_port->text());
-    settings.setValue("ip_addres", ui->lineEdit_ip->text());
-    settings.setValue("serialPortCheckBox",ui->selectBox_serial_port->isChecked());
+    settings.setValue("listen_port_UDP",ui->lineEdit_listen_port->text());
+    settings.setValue("send_port_UDP",ui->lineEdit_send_port->text());
+    settings.setValue("ip_addres_UDP", ui->lineEdit_ip->text());
+    settings.setValue("listen_port_TCP",ui->lineEdit_listen_port_TCP->text());
+    settings.setValue("send_port_TCP",ui->lineEdit_send_port_TCP->text());
+    settings.setValue("ip_addres_TCP", ui->lineEdit_ip_TCP->text());
+
+    if(ui->selectBox_serial_port->isChecked()){
+        settings.setValue("connType","RS232");
+    }else if(ui->groupBox_ethernet->isChecked()){
+        settings.setValue("connType","UDP");
+    }else if(ui->groupBox_TCP->isChecked()){
+        settings.setValue("connType","TCP");
+    }
+
     settings.endGroup();
     settings.sync();
 }
@@ -199,8 +230,6 @@ void SettingsDialog::fillPortsParameters()
     ui->baudRateBox->addItem(QStringLiteral("115200"), QSerialPort::Baud115200);
     ui->baudRateBox->addItem(tr("Custom"));
 
-
-
     ui->dataBitsBox->addItem(QStringLiteral("5"), QSerialPort::Data5);
     ui->dataBitsBox->addItem(QStringLiteral("6"), QSerialPort::Data6);
     ui->dataBitsBox->addItem(QStringLiteral("7"), QSerialPort::Data7);
@@ -245,7 +274,6 @@ void SettingsDialog::fillPortsInfo()
 
         ui->serialPortInfoListBox->addItem(list.first(), list);
     }
-
     ui->serialPortInfoListBox->addItem(tr("Custom"));
 }
 
@@ -280,28 +308,37 @@ void SettingsDialog::updateSettings()
     }
 
     if(ui->groupBox_ethernet->isChecked()){
-        currentSettings.ip_adress.setAddress(ui->lineEdit_ip->text());
-        currentSettings.send_port = (quint16)ui->lineEdit_send_port->text().toUInt();
-        currentSettings.listen_port = (quint16)ui->lineEdit_listen_port->text().toUInt();
+        currentSettings.ip_adress_UDP.setAddress(ui->lineEdit_ip->text());
+        currentSettings.send_port_UDP = (quint16)ui->lineEdit_send_port->text().toUInt();
+        currentSettings.listen_port_UDP = (quint16)ui->lineEdit_listen_port->text().toUInt();
+    }
+
+    if(ui->groupBox_TCP->isChecked()){
+        currentSettings.ip_adress_TCP.setAddress(ui->lineEdit_ip_TCP->text());
+        currentSettings.send_port_TCP = (quint16)ui->lineEdit_send_port_TCP->text().toUInt();
+        currentSettings.listen_port_TCP = (quint16)ui->lineEdit_listen_port_TCP->text().toUInt();
     }
 
     if(ui->selectBox_serial_port->isChecked()){
         currentSettings.connectionType = SerialPortConnection;
-    }else{
-        currentSettings.connectionType = EthernetConnection;
+    }else if(ui->groupBox_ethernet->isChecked()){
+        currentSettings.connectionType = UDP_Connection;
+    }
+    else {
+        currentSettings.connectionType = TCP_Connection;
     }
 }
-
-
 
 void SettingsDialog::on_selectBox_serial_port_clicked(bool checked)
 {
     if(checked){
         ui->groupBox_ethernet->setChecked(false);
+        ui->groupBox_TCP->setChecked(false);
     }
 
     if(!checked){
         ui->groupBox_ethernet->setChecked(true);
+        ui->groupBox_TCP->setChecked(false);
     }
 }
 
@@ -309,11 +346,34 @@ void SettingsDialog::on_groupBox_ethernet_clicked(bool checked)
 {
     if(checked){
         ui->selectBox_serial_port->setChecked(false);
+        ui->groupBox_TCP->setChecked(false);
     }
 
     if(!checked){
         ui->selectBox_serial_port->setChecked(true);
+        ui->groupBox_TCP->setChecked(false);
     }
 }
 
+void SettingsDialog::on_groupBox_TCP_clicked(bool checked)
+{
+    if(checked){
+        ui->groupBox_ethernet->setChecked(false);
+        ui->selectBox_serial_port->setChecked(false);
+    }
 
+    if(!checked){
+        ui->groupBox_ethernet->setChecked(false);
+        ui->selectBox_serial_port->setChecked(true);
+    }
+}
+
+void SettingsDialog::on_radioButtonClient_clicked()
+{
+    currentSettings.serverApp = false;
+}
+
+void SettingsDialog::on_radioButtonServer_clicked()
+{
+    currentSettings.serverApp = true;
+}

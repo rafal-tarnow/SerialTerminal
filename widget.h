@@ -42,25 +42,23 @@ private slots:
     void dataFromSerial(QByteArray);
     void openConnection();
     void closeConnection();
+
     void on_pushButton_open_clicked();
     void on_pushButton_configure_clicked();
-
     void on_pushButton_send_clicked();
-
     void on_pushButton_clicked();
-
     void on_pushButton_addFrame_clicked();
-
+    void on_pushButton_delFrame_clicked();
 
     void on_comboBox_currentIndexChanged(const QString &arg1);
-
-    void on_pushButton_delFrame_clicked();
 
     void timerEventDodajTekst();
     void sendByTimerSlot();
     void on_pushButton_newLinePolicy_clicked();
 
     void on_checkBox_sendByTimer_clicked(bool checked);
+
+    void closeSocket();
 
 private:
     typedef enum{

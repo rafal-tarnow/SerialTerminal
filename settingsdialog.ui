@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>609</width>
-    <height>471</height>
+    <width>616</width>
+    <height>632</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,6 +15,114 @@
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
    <item row="2" column="0" colspan="2">
+    <widget class="QGroupBox" name="groupBox_TCP">
+     <property name="title">
+      <string>TCP Ethernet</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <widget class="QLabel" name="label_7">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>88</y>
+        <width>88</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Listen on port:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_send_port_TCP">
+      <property name="geometry">
+       <rect>
+        <x>104</x>
+        <y>59</y>
+        <width>221</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_8">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>59</y>
+        <width>88</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Send on port:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_listen_port_TCP">
+      <property name="geometry">
+       <rect>
+        <x>104</x>
+        <y>88</y>
+        <width>221</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_ip_TCP">
+      <property name="geometry">
+       <rect>
+        <x>104</x>
+        <y>30</y>
+        <width>480</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_9">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>88</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Send to IP:</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="radioButtonServer">
+      <property name="geometry">
+       <rect>
+        <x>450</x>
+        <y>60</y>
+        <width>100</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Server</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="radioButtonClient">
+      <property name="geometry">
+       <rect>
+        <x>450</x>
+        <y>90</y>
+        <width>100</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Client</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <spacer name="horizontalSpacer">
@@ -37,48 +145,6 @@
       </widget>
      </item>
     </layout>
-   </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="QGroupBox" name="groupBox_ethernet">
-     <property name="title">
-      <string>UDP Ethernet</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>Send on port:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Send to IP:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="lineEdit_ip"/>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="lineEdit_send_port"/>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Listen on port:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="lineEdit_listen_port"/>
-      </item>
-     </layout>
-    </widget>
    </item>
    <item row="0" column="0" colspan="2">
     <widget class="QGroupBox" name="selectBox_serial_port">
@@ -196,7 +262,52 @@
      </layout>
     </widget>
    </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="QGroupBox" name="groupBox_ethernet">
+     <property name="title">
+      <string>UDP Ethernet</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Send on port:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Send to IP:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="lineEdit_ip"/>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="lineEdit_send_port"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Listen on port:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="lineEdit_listen_port"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
   </layout>
+  <zorder>selectBox_serial_port</zorder>
+  <zorder>groupBox_ethernet</zorder>
+  <zorder>groupBox_TCP</zorder>
  </widget>
  <resources/>
  <connections/>
